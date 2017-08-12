@@ -77,7 +77,8 @@ class AudioRecord {
         let frameLength = Int32(buffer.frameLength)
         let bytes = lame_encode_buffer_ieee_float(this.lame, lbuf, rbuf, frameLength, this.mp3Buffer, Int32(AudioRecord.bufSize))
 
-        let volume = this.calculateVoluem(lbuf: lbuf, rbuf: rbuf, frameLength: UInt(buffer.frameLength))
+        var volume = this.calculateVoluem(lbuf: lbuf, rbuf: rbuf, frameLength: UInt(buffer.frameLength))
+        volume = min((volume + Float(60))/65.0, 1.0)
         
         this.minLevel = min(this.minLevel, volume)
         this.maxLevel = max(this.maxLevel, volume)
@@ -107,8 +108,6 @@ class AudioRecord {
     avgValue = 0
     vDSP_meamgv(rbuf, 1, &avgValue, frameLength);
     self.averagePowerForChannel1 = (levelLowpassTrig * ((avgValue==0) ? -100 : 20.0 * log10f(avgValue))) + ((1-levelLowpassTrig)*self.averagePowerForChannel1)
-    print("channel0: \(self.averagePowerForChannel0)")
-    print("channel1: \(self.averagePowerForChannel1)")
     return (self.averagePowerForChannel0 + self.averagePowerForChannel1) / 2
   }
   
@@ -142,10 +141,13 @@ class AudioRecord {
       var url = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
       let name = String(CACurrentMediaTime()).appending(".mp3")
       url.appendPathComponent(name)
-      try data.write(to: url)
+      if !data.isEmpty {
+        try data.write(to: url)
+      }
     } catch {
       print("文件操作")
     }
+    data.removeAll()
   }
   
 }
