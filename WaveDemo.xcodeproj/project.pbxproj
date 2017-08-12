@@ -12,6 +12,9 @@
 		04F1F0031F3D98DF001BCD07 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 04F1F0011F3D98DF001BCD07 /* Main.storyboard */; };
 		04F1F0051F3D98DF001BCD07 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04F1F0041F3D98DF001BCD07 /* Assets.xcassets */; };
 		04F1F0081F3D98DF001BCD07 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 04F1F0061F3D98DF001BCD07 /* LaunchScreen.storyboard */; };
+		04F1F0101F3D9902001BCD07 /* AudioRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04F1F00F1F3D9902001BCD07 /* AudioRecord.swift */; };
+		04F1F0121F3D9929001BCD07 /* WaveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04F1F0111F3D9929001BCD07 /* WaveView.swift */; };
+		04F1F0141F3DAC28001BCD07 /* lame.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04F1F0131F3DAC28001BCD07 /* lame.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +25,10 @@
 		04F1F0041F3D98DF001BCD07 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		04F1F0071F3D98DF001BCD07 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		04F1F0091F3D98DF001BCD07 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		04F1F00F1F3D9902001BCD07 /* AudioRecord.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioRecord.swift; sourceTree = "<group>"; };
+		04F1F0111F3D9929001BCD07 /* WaveView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WaveView.swift; sourceTree = "<group>"; };
+		04F1F0131F3DAC28001BCD07 /* lame.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = lame.framework; sourceTree = "<group>"; };
+		04F1F0161F3DACF3001BCD07 /* WaveDemo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WaveDemo-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,6 +36,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04F1F0141F3DAC28001BCD07 /* lame.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -54,12 +62,16 @@
 		04F1EFFC1F3D98DF001BCD07 /* WaveDemo */ = {
 			isa = PBXGroup;
 			children = (
+				04F1F0131F3DAC28001BCD07 /* lame.framework */,
 				04F1EFFD1F3D98DF001BCD07 /* AppDelegate.swift */,
 				04F1EFFF1F3D98DF001BCD07 /* ViewController.swift */,
 				04F1F0011F3D98DF001BCD07 /* Main.storyboard */,
 				04F1F0041F3D98DF001BCD07 /* Assets.xcassets */,
 				04F1F0061F3D98DF001BCD07 /* LaunchScreen.storyboard */,
 				04F1F0091F3D98DF001BCD07 /* Info.plist */,
+				04F1F00F1F3D9902001BCD07 /* AudioRecord.swift */,
+				04F1F0111F3D9929001BCD07 /* WaveView.swift */,
+				04F1F0161F3DACF3001BCD07 /* WaveDemo-Bridging-Header.h */,
 			);
 			path = WaveDemo;
 			sourceTree = "<group>";
@@ -97,6 +109,7 @@
 					04F1EFF91F3D98DF001BCD07 = {
 						CreatedOnToolsVersion = 8.3.3;
 						DevelopmentTeam = ZZ9329T9X9;
+						LastSwiftMigration = 0830;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -139,6 +152,8 @@
 			files = (
 				04F1F0001F3D98DF001BCD07 /* ViewController.swift in Sources */,
 				04F1EFFE1F3D98DF001BCD07 /* AppDelegate.swift in Sources */,
+				04F1F0101F3D9902001BCD07 /* AudioRecord.swift in Sources */,
+				04F1F0121F3D9929001BCD07 /* WaveView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -263,11 +278,19 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				DEVELOPMENT_TEAM = ZZ9329T9X9;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/WaveDemo",
+				);
 				INFOPLIST_FILE = WaveDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.iosleep.WaveDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "WaveDemo/WaveDemo-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -276,11 +299,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				DEVELOPMENT_TEAM = ZZ9329T9X9;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/WaveDemo",
+				);
 				INFOPLIST_FILE = WaveDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.iosleep.WaveDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "WaveDemo/WaveDemo-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;

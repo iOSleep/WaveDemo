@@ -13,13 +13,19 @@ class ViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     // Do any additional setup after loading the view, typically from a nib.
+    AudioRecord.shared.delegate = self
   }
-
-  override func didReceiveMemoryWarning() {
-    super.didReceiveMemoryWarning()
-    // Dispose of any resources that can be recreated.
+  @IBAction func record() {
+    AudioRecord.shared.record()
   }
+  @IBAction func stop() {
+    AudioRecord.shared.stop()
+  }
+}
 
-
+extension ViewController: AudioRecordPortocol {
+  func record(_ record: AudioRecord, voluem: Float) {
+    print("volue: \(voluem)")
+  }
 }
 
