@@ -72,13 +72,17 @@ class AudioRecord {
         return
       }
       
-      if let lbuf = buffer.floatChannelData?[0],
-        let rbuf = buffer.floatChannelData?[1] {
+      if let buf = buffer.floatChannelData?[0]
+      {
         let frameLength = Int32(buffer.frameLength)
-        let bytes = lame_encode_buffer_ieee_float(this.lame, lbuf, rbuf, frameLength, this.mp3Buffer, Int32(AudioRecord.bufSize))
-
-        var volume = this.calculateVoluem(lbuf: lbuf, rbuf: rbuf, frameLength: UInt(buffer.frameLength))
-        volume = min((volume + Float(60))/65.0, 1.0)
+        let bytes = lame_encode_buffer_interleaved_ieee_float(this.lame, buf, frameLength, this.mp3Buffer, Int32(AudioRecord.bufSize))
+        
+        let levelLowpassTrig: Float = 1.0
+        var avgValue: Float32 = 0
+        vDSP_meamgv(buf, 1, &avgValue, vDSP_Length(frameLength))
+        this.averagePowerForChannel0 = (levelLowpassTrig * ((avgValue==0) ? -100 : 20.0 * log10f(avgValue))) + ((1-levelLowpassTrig) * this.averagePowerForChannel0)
+        
+        let volume = min((this.averagePowerForChannel0 + Float(55))/55.0, 1.0)
         
         this.minLevel = min(this.minLevel, volume)
         this.maxLevel = max(this.maxLevel, volume)
@@ -96,19 +100,6 @@ class AudioRecord {
     } catch {
       print("engine启动")
     }
-  }
-  
-  private func calculateVoluem(lbuf: UnsafeMutablePointer<Float>, rbuf: UnsafeMutablePointer<Float>, frameLength: UInt) -> Float {
-    let levelLowpassTrig: Float = 1.0
-    var avgValue: Float32 = 0
-    vDSP_meamgv(lbuf, 1, &avgValue, frameLength)
-    self.averagePowerForChannel0 = (levelLowpassTrig * ((avgValue==0) ? -100 : 20.0 * log10f(avgValue))) + ((1-levelLowpassTrig) * self.averagePowerForChannel0)
-    self.averagePowerForChannel1 = self.averagePowerForChannel0
-    
-    avgValue = 0
-    vDSP_meamgv(rbuf, 1, &avgValue, frameLength);
-    self.averagePowerForChannel1 = (levelLowpassTrig * ((avgValue==0) ? -100 : 20.0 * log10f(avgValue))) + ((1-levelLowpassTrig)*self.averagePowerForChannel1)
-    return (self.averagePowerForChannel0 + self.averagePowerForChannel1) / 2
   }
   
   private func initLame() {
