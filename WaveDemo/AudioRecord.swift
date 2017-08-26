@@ -10,16 +10,6 @@ import UIKit
 import AVFoundation
 import Accelerate
 
-struct Platform {
-  static let isSimulator: Bool = {
-    var isSim = false
-    #if arch(i386) || arch(x86_64)
-      isSim = true
-    #endif
-    return isSim
-  }()
-}
-
 protocol AudioRecordPortocol: NSObjectProtocol {
   func record(_ record: AudioRecord, voluem: Float)
 }
@@ -40,10 +30,6 @@ class AudioRecord {
   private var minLevel: Float = 0.0
   private var maxLevel: Float = 0.0
   
-  init() {
-    initLame()
-  }
-  
   deinit {
     mp3Buffer.deallocate(capacity: AudioRecord.bufSize)
   }
@@ -52,16 +38,17 @@ class AudioRecord {
     let session = AVAudioSession.sharedInstance()
     do {
       try session.setCategory(AVAudioSessionCategoryPlayAndRecord)
+      try session.setPreferredSampleRate(44100)
+      try session.setPreferredIOBufferDuration(0.1)
       try session.setActive(true)
-      try session.setPreferredSampleRate( Platform.isSimulator ? 44100 : 22050)
+      initLame()
     } catch {
       print("seesion设置")
       return
     }
-    engine = AVAudioEngine()
     
-    guard let engine = engine,
-          let input = engine.inputNode else {
+    guard let input = engine?.inputNode else {
+      print("input获取")
       return
     }
     
@@ -74,10 +61,10 @@ class AudioRecord {
       
       if let buf = buffer.floatChannelData?[0]
       {
-        let frameLength = Int32(buffer.frameLength)
+        let frameLength = Int32(buffer.frameLength) / 2
         let bytes = lame_encode_buffer_interleaved_ieee_float(this.lame, buf, frameLength, this.mp3Buffer, Int32(AudioRecord.bufSize))
         
-        let levelLowpassTrig: Float = 1.0
+        let levelLowpassTrig: Float = 0.5
         var avgValue: Float32 = 0
         vDSP_meamgv(buf, 1, &avgValue, vDSP_Length(frameLength))
         this.averagePowerForChannel0 = (levelLowpassTrig * ((avgValue==0) ? -100 : 20.0 * log10f(avgValue))) + ((1-levelLowpassTrig) * this.averagePowerForChannel0)
@@ -90,13 +77,15 @@ class AudioRecord {
         DispatchQueue.main.async {
           this.delegate?.record(this, voluem: volume)
         }
-        this.data.append(this.mp3Buffer, count: Int(bytes))
+        if bytes > 0 {
+          this.data.append(this.mp3Buffer, count: Int(bytes))
+        }
       }
     }
     
-    engine.prepare()
+    engine?.prepare()
     do {
-      try engine.start()
+      try engine?.start()
     } catch {
       print("engine启动")
     }
@@ -111,12 +100,9 @@ class AudioRecord {
     }
     
     let format = input.inputFormat(forBus: 0)
-    let sampleRate = Int32(format.sampleRate)
-    let channelCount = Int32(format.channelCount)
+    let sampleRate = Int32(format.sampleRate) / 2
     
     lame = lame_init()
-    lame_set_bWriteVbrTag(lame, 0);
-    lame_set_num_channels(lame, channelCount);
     lame_set_in_samplerate(lame, sampleRate);
     lame_set_VBR_mean_bitrate_kbps(lame, 96);
     lame_set_VBR(lame, vbr_off);
@@ -134,6 +120,9 @@ class AudioRecord {
       url.appendPathComponent(name)
       if !data.isEmpty {
         try data.write(to: url)
+      }
+      else {
+        print("空文件")
       }
     } catch {
       print("文件操作")
